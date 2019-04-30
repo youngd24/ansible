@@ -16,8 +16,12 @@
   ###
   - debug: var=ansible_distribution
 
+################################################################################
+# Debian section
+################################################################################
+
   ###
-  - name: Check if webmin is installed (Debian version)
+  - name: Check if webmin is installed (Debian)
     command: dpkg-query -W webmin
     register: webmin_check_deb
     failed_when: webmin_check_deb.rc > 1
@@ -25,7 +29,7 @@
     when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
   ###
-  - name: Install webmin required packages
+  - name: Install webmin required packages (Debian)
     apt:
       name: "{{ packages }}"
     vars:
@@ -41,13 +45,17 @@
     when: webmin_check_deb.rc == 1
 
   ###
-  - name: Download webmin package
+  - name: Download webmin package (Debian)
     get_url: 
       url="{{ deb_pkg }}"
       dest="/tmp/webmin.deb"
     when: webmin_check_deb.rc == 1
 
   ###
-  - name: Install webmin
+  - name: Install webmin (Debian)
     apt: deb="/tmp/webmin.deb"
     when: webmin_check_deb.rc == 1
+
+
+
+
