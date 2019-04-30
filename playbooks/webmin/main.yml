@@ -6,12 +6,18 @@
 ################################################################################
 - name: Install webmin
   hosts: all
+  vars:
+    paths_to_vars_files:
+      - vars/{{ ansible_hostname }}.yml
+      - vars/default.yml
   become: true
   user: ansible
   connection: ssh 
 
   ###
   tasks:
+  - include_vars: "{{ item }}"
+    with_first_found: "{{ paths_to_vars_files }}"
 
   ###
   - debug: var=ansible_distribution
