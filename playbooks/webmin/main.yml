@@ -1,7 +1,7 @@
 ---
 ################################################################################
 #
-#
+# Install Webmin
 #
 ################################################################################
 - name: Install webmin
@@ -17,7 +17,7 @@
   - debug: var=ansible_distribution
 
 ################################################################################
-# Debian section
+# Debian/Ubuntu/Raspbian section
 ################################################################################
 
   ###
@@ -26,14 +26,16 @@
     register: webmin_check_deb
     failed_when: webmin_check_deb.rc > 1
     changed_when: webmin_check_deb.rc == 1
-    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    when: ansible_distribution == 'Debian' or
+          ansible_distribution == 'Ubuntu' or
+          ansible_distribution == 'Raspbian'
 
   ###
   - name: Install webmin required packages (Debian)
     apt:
-      name: "{{ packages }}"
+      name: "{{ apt_packages }}"
     vars:
-      packages:
+      apt_packages:
       - perl
       - libnet-ssleay-perl
       - openssl
@@ -57,5 +59,40 @@
     when: webmin_check_deb.rc == 1
 
 
+################################################################################
+# CentOS/RedHat section
+################################################################################
 
+  ###
+  - name: Check if webmin is installed (CentOS)
+    command: rpm -q webmin
+    register: webmin_check_rpm
+    failed_when: webmin_check_rpm.rc > 1
+    changed_when: webmin_check_rpm.rc == 1
+    when: ansible_distribution == 'CentOS' or
+          ansible_distribution == 'Red Hat Enterprise Linux' 
 
+  ###
+  - name: Install webmin required packages (CentOS)
+    name:
+      name: "{{ rpm_packages }}"
+    vars:
+      rpm_packages:
+      - perl
+      - perl-Net-SSLeay
+      - openssl
+      - perl-IO-Tty
+      - perl-Encode-Detect
+    when: webmin_check_rpm.rc == 1
+
+  ###
+  - name: Download webmin package (CentOS)
+    get_url: 
+      url="{{ rpm_pkg }}"
+      dest="/tmp/webmin.rpm"
+    when: webmin_check_rpm.rc == 1
+
+  ###
+  - name: Install webmin (CentOS)
+    apt: deb="/tmp/webmin.rpm"
+    when: webmin_check_rpm.rc == 1
