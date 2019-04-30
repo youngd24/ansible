@@ -1,0 +1,52 @@
+---
+################################################################################
+#
+#
+#
+################################################################################
+- name: Install webmin
+  hosts: all
+  become: true
+  user: ansible
+  connection: ssh 
+
+  ###
+  tasks:
+
+  ###
+  - debug: var=ansible_distribution
+
+  ###
+  - name: Check if webmin is installed
+    command: dpkg-query -W webmin
+    register: webmin_check_deb
+    failed_when: webmin_check_deb.rc > 1
+    changed_when: webmin_check_deb.rc == 1
+
+  ###
+  - name: Install webmin required packages
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - perl
+      - libnet-ssleay-perl
+      - openssl
+      - libauthen-pam-perl
+      - libpam-runtime
+      - libio-pty-perl
+      - apt-show-versions
+      - python
+    when: webmin_check_deb.rc == 1
+
+  ###
+  - name: Download webmin package
+    get_url: 
+      url="{{ deb_pkg }}"
+      dest="/tmp/webmin.deb"
+    when: webmin_check_deb.rc == 1
+
+  ###
+  - name: Install webmin
+    apt: deb="/tmp/webmin.deb"
+    when: webmin_check_deb.rc == 1

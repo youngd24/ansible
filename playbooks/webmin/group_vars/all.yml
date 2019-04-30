@@ -1,0 +1,2 @@
+deb_pkg: "https://prdownloads.sourceforge.net/webadmin/webmin_1.900_all.deb"
+rpm_pkg: "https://prdownloads.sourceforge.net/webadmin/webmin-1.900-1.noarch.rpm"
